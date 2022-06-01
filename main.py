@@ -12,10 +12,12 @@ import SQLighter
 from SQLighter import SQLighter
 from telebot import types
 bot = telebot.TeleBot(config.token)
-currentfront1 = 0
-currentfront2 = 0
-currentfront3 = 0
 @bot.message_handler(commands=['start'])
+def game(message):
+    markup = utils.generate_markup_lite()
+    bot.send_message(message.chat.id, 'Hello! This is unoficial shuffler-bot for "Welcome to" board game. You need to have original game for using this bot. press button to start game', reply_markup=markup)
+
+@bot.message_handler(commands=['StartGame'])
 def game(message):
     # Подключаемся к БД
     db_worker = SQLighter(config.database_name)
@@ -35,80 +37,112 @@ def game(message):
     rowtop1 = db_worker.select_single(deck.pop())
     rowtop2 = db_worker.select_single(deck.pop())
     rowtop3 = db_worker.select_single(deck.pop())
-    deck.append(rowtop1)
-    deck.append(rowtop2)
-    deck.append(rowtop3)
+    deck.append(rowtop1[0])
+    deck.append(rowtop2[0])
+    deck.append(rowtop3[0])
     # Получаем строки из БД
+    bot.send_message(message.chat.id, 'Woo-ho, new round!', reply_markup=markup)
     bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop1[1]),types.InputMediaPhoto(rowbot1[2])])
     bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop2[1]),types.InputMediaPhoto(rowbot2[2])])
     bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop3[1]),types.InputMediaPhoto(rowbot3[2])])
     #bot.send_media_group(message.chat.id, [{'type': 'photo', 'media': rowtop3[1]}, {'type': 'photo', 'media': rowbot3[2]}])
     utils.set_user_game(message.chat.id, deck)
-    bot.send_message(message.chat.id, 's', reply_markup=markup)
+
     # Отсоединяемся от БД
     db_worker.close()
 
 @bot.message_handler(commands=['shuflle'])
-def game(message):
+def shuflle(message):
     # Подключаемся к БД
     db_worker = SQLighter(config.database_name)
-    # Получаем случайную строку из БД
-    row = db_worker.select_single(random.randint(1, utils.get_rows_count()))
     # Формируем разметку
-    markup = utils.generate_markup(row[2], row[3])
+    markup = utils.generate_markup()
     # Отправляем аудиофайл с вариантами ответа
-    bot.send_voice(message.chat.id, row[1], reply_markup=markup)
+    # bot.send_photo(message.chat.id, row[1], reply_markup=markup)
     # Включаем "игровой режим"
-    utils.set_user_game(message.chat.id, row[2])
-    # Отсоединяемся от БД
+    deck = []
+    for i in range(81):
+        deck.append(i + 1)
+    random.shuffle(deck)
+
+    rowbot1 = db_worker.select_single(deck.pop())
+    rowbot2 = db_worker.select_single(deck.pop())
+    rowbot3 = db_worker.select_single(deck.pop())
+    rowtop1 = db_worker.select_single(deck.pop())
+    rowtop2 = db_worker.select_single(deck.pop())
+    rowtop3 = db_worker.select_single(deck.pop())
+    deck.append(rowtop1[0])
+    deck.append(rowtop2[0])
+    deck.append(rowtop3[0])
+    # Получаем строки из БД
+    bot.send_message(message.chat.id, 'Woo-ho, shuffle!', reply_markup=markup)
+    bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop1[1]), types.InputMediaPhoto(rowbot1[2])])
+    bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop2[1]), types.InputMediaPhoto(rowbot2[2])])
+    bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop3[1]), types.InputMediaPhoto(rowbot3[2])])
+
+    utils.set_user_game(message.chat.id, deck)
+
     db_worker.close()
+
+
 @bot.message_handler(commands=['next'])
-def game(message):
+def next(message):
     # Подключаемся к БД
     db_worker = SQLighter(config.database_name)
-    # Получаем случайную строку из БД
-    row = db_worker.select_single(random.randint(1, utils.get_rows_count()))
     # Формируем разметку
-    markup = utils.generate_markup(row[2], row[3])
+    markup = utils.generate_markup()
     # Отправляем аудиофайл с вариантами ответа
-    bot.send_voice(message.chat.id, row[1], reply_markup=markup)
+    # bot.send_photo(message.chat.id, row[1], reply_markup=markup)
     # Включаем "игровой режим"
-    utils.set_user_game(message.chat.id, row[2])
+    deck = utils.get_deck_for_user(message.chat.id)
+    if (len(deck)<6):
+        if (len(deck)>2):
+            rowbot1 = db_worker.select_single(deck.pop())
+            rowbot2 = db_worker.select_single(deck.pop())
+            rowbot3 = db_worker.select_single(deck.pop())
+        deck = []
+        for i in range(81):
+            deck.append(i + 1)
+        random.shuffle(deck)
+        if (len(deck) > 2):
+            deck.append(rowbot1[0])
+            deck.append(rowbot2[0])
+            deck.append(rowbot3[0])
+    rowbot1 = db_worker.select_single(deck.pop())
+    rowbot2 = db_worker.select_single(deck.pop())
+    rowbot3 = db_worker.select_single(deck.pop())
+    rowtop1 = db_worker.select_single(deck.pop())
+    rowtop2 = db_worker.select_single(deck.pop())
+    rowtop3 = db_worker.select_single(deck.pop())
+    deck.append(rowtop1[0])
+    deck.append(rowtop2[0])
+    deck.append(rowtop3[0])
+    # Получаем строки из БД
+    bot.send_message(message.chat.id, 'Woo-ho, new round!', reply_markup=markup)
+    bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop1[1]), types.InputMediaPhoto(rowbot1[2])])
+    bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop2[1]), types.InputMediaPhoto(rowbot2[2])])
+    bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop3[1]), types.InputMediaPhoto(rowbot3[2])])
+
+    utils.set_user_game(message.chat.id, deck)
+
     # Отсоединяемся от БД
     db_worker.close()
 @bot.message_handler(commands=['end'])
-def game(message):
-    # Подключаемся к БД
-    db_worker = SQLighter(config.database_name)
-    # Получаем случайную строку из БД
-    row = db_worker.select_single(random.randint(1, utils.get_rows_count()))
-    # Формируем разметку
-    markup = utils.generate_markup(row[2], row[3])
-    # Отправляем аудиофайл с вариантами ответа
-    bot.send_voice(message.chat.id, row[1], reply_markup=markup)
-    # Включаем "игровой режим"
-    utils.set_user_game(message.chat.id, row[2])
-    # Отсоединяемся от БД
-    db_worker.close()
-    
+def end(message):
+    utils.finish_user_game(message.chat.id)
+    markup = utils.generate_markup_lite()
+    bot.send_message(message.chat.id, 'Thank you for playing!', reply_markup=markup)
+
+
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def check_answer(message):
     # Если функция возвращает None -> Человек не в игре
-    answer = utils.get_answer_for_user(message.chat.id)
-    # Как Вы помните, answer может быть либо текст, либо None
-    # Если None:
-    if not answer:
-        bot.send_message(message.chat.id, 'Чтобы начать игру, выберите команду /game')
+    if (utils.get_deck_for_user(message.chat.id)):
+        markup = utils.generate_markup()
     else:
-        # Уберем клавиатуру с вариантами ответа.
-        keyboard_hider = types.ReplyKeyboardRemove()
-        # Если ответ правильный/неправильный
-        if message.text == answer:
-            bot.send_message(message.chat.id, 'Верно!', reply_markup=keyboard_hider)
-        else:
-            bot.send_message(message.chat.id, 'Увы, Вы не угадали. Попробуйте ещё раз!', reply_markup=keyboard_hider)
-        # Удаляем юзера из хранилища (игра закончена)
-        utils.finish_user_game(message.chat.id)
+        markup = utils.generate_markup_lite()
+    bot.send_message(message.chat.id,'Oh,no, just choose the button.',reply_markup=markup)
+
 
 '''
 @bot.message_handler(commands=['test'])

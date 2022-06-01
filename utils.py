@@ -44,7 +44,7 @@ def finish_user_game(chat_id):
         del storage[str(chat_id)]
 
 
-def get_answer_for_user(chat_id):
+def get_deck_for_user(chat_id):
     """
     Получаем правильный ответ для текущего юзера.
     В случае, если человек просто ввёл какие-то символы, не начав игру, возвращаем None
@@ -53,8 +53,8 @@ def get_answer_for_user(chat_id):
     """
     with shelve.open(shelve_name) as storage:
         try:
-            deck,decktop,deckbot = storage[str(chat_id)]
-            return deck,decktop,deckbot
+            deck = storage[str(chat_id)]
+            return deck
         # Если человек не играет, ничего не возвращаем
         except KeyError:
             return None
@@ -72,10 +72,14 @@ def generate_markup():
     list_items.append("/"+"next")
     list_items.append("/"+"shuflle")
     list_items.append("/" + "end")
-    list_items.append("/" + "start")
     # Хорошенько перемешаем все элементы
     #random.shuffle(list_items)
     # Заполняем разметку перемешанными элементами
     for item in list_items:
         markup.add(item)
+    return markup
+
+def generate_markup_lite():
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    markup.add("/" + "StartGame")
     return markup
