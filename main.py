@@ -15,7 +15,7 @@ bot = telebot.TeleBot(config.token)
 @bot.message_handler(commands=['start'])
 def game(message):
     markup = utils.generate_markup_lite()
-    bot.send_message(message.chat.id, 'Hello! This is unoficial shuffler-bot for "Welcome to" board game. You need to have original game for using this bot. press button to start game', reply_markup=markup)
+    bot.send_message(message.chat.id, 'Hello! This is unoficial shuffler-bot for "Welcome to" board game. You need to have your own original game for using this bot. Press button to start game', reply_markup=markup)
 
 @bot.message_handler(commands=['StartGame'])
 def game(message):
@@ -45,7 +45,6 @@ def game(message):
     bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop1[1]),types.InputMediaPhoto(rowbot1[2])])
     bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop2[1]),types.InputMediaPhoto(rowbot2[2])])
     bot.send_media_group(message.chat.id, [types.InputMediaPhoto(rowtop3[1]),types.InputMediaPhoto(rowbot3[2])])
-    #bot.send_media_group(message.chat.id, [{'type': 'photo', 'media': rowtop3[1]}, {'type': 'photo', 'media': rowbot3[2]}])
     utils.set_user_game(message.chat.id, deck)
 
     # Отсоединяемся от БД
