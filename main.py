@@ -15,6 +15,7 @@ bot = telebot.TeleBot(config.token)
 @bot.message_handler(commands=['start'])
 def game(message):
     markup = utils.generate_markup_lite()
+    print(message.chat.id)
     bot.send_message(message.chat.id, 'Hello! This is unoficial shuffler-bot for "Welcome to" board game. You need to have your own original game for using this bot. Press button to start game', reply_markup=markup)
 
 @bot.message_handler(commands=['StartGame'])
