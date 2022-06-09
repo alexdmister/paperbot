@@ -160,3 +160,6 @@ cython_debug/
 #.idea/
 /config.py
 /DB.db
+/shelve.db.bak
+/shelve.db.dat
+/shelve.db.dir
